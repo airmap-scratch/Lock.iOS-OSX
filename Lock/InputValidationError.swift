@@ -27,6 +27,7 @@ enum InputValidationError: ErrorType {
     case NotAnEmailAddress
     case NotAUsername
     case NotAOneTimePassword
+    case PasswordPolicyViolation(result: [RuleResult])
 
     func localizedMessage(withConnection connection: DatabaseConnection) -> String {
         switch self {
@@ -39,6 +40,10 @@ enum InputValidationError: ErrorType {
             return "Must not be empty".i18n(key: "com.auth0.lock.input.empty.error", comment: "empty input")
         case .NotAOneTimePassword:
             return "Must be a valid numeric code".i18n(key: "com.auth0.lock.input.otp.error", comment: "invalid otp")
+        case .PasswordPolicyViolation(let result) where result.count < 2:
+            return "Must not be empty".i18n(key: "com.auth0.lock.input.empty.error", comment: "empty input")
+        case .PasswordPolicyViolation(let result):
+            return result.first?.message ?? "Must not be empty".i18n(key: "com.auth0.lock.input.empty.error", comment: "empty input")
         }
     }
 }

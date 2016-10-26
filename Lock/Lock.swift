@@ -57,7 +57,7 @@ public class Lock: NSObject {
      - returns: a newly created Lock instance
      */
     required public init(authentication: Authentication, webAuth: WebAuth) {
-        let (authenticationWithTelemetry, webAuthWithTelemetry) = telemetryFor(authenticaction: authentication, webAuth: webAuth)
+        let (authenticationWithTelemetry, webAuthWithTelemetry) = telemetryFor(authentication: authentication, webAuth: webAuth)
         self.authentication = authenticationWithTelemetry
         self.webAuth = webAuthWithTelemetry
     }
@@ -237,7 +237,7 @@ public enum UnrecoverableError: ErrorType {
     case InvalidOptions(cause: String)
 }
 
-private func telemetryFor(authenticaction authentication: Authentication, webAuth: WebAuth) -> (Authentication, WebAuth) {
+private func telemetryFor(authentication authentication: Authentication, webAuth: WebAuth) -> (Authentication, WebAuth) {
     var authentication = authentication
     var webAuth = webAuth
     let name = "Lock.swift"
