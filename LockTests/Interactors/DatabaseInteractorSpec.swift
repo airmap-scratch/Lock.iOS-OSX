@@ -204,15 +204,11 @@ class DatabaseInteractorSpec: QuickSpec {
                 }
 
                 it("should raise error if username is empty") {
-                    expect{ try database.update(.Password, value: "") }.to(throwError(InputValidationError.MustNotBeEmpty))
-                }
-
-                it("should raise error if password is only spaces") {
-                    expect{ try database.update(.Password, value: "     ") }.to(throwError(InputValidationError.MustNotBeEmpty))
+                    expect{ try database.update(.Password, value: "") }.to(throwError(InputValidationError.PasswordPolicyViolation(result: [])))
                 }
 
                 it("should raise error if password is nil") {
-                    expect{ try database.update(.Password, value: nil) }.to(throwError(InputValidationError.MustNotBeEmpty))
+                    expect{ try database.update(.Password, value: nil) }.to(throwError(InputValidationError.PasswordPolicyViolation(result: [])))
                 }
                 
             }
