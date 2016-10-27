@@ -79,7 +79,7 @@ struct CDNLoaderInteractor: RemoteConnectionLoader, Loggable {
                 if let auth0 = info.auth0 {
                     auth0.connections.forEach { connection in
                         let requiresUsername = connection.booleanValue(forKey: "requires_username")
-                        connections.database(name: connection.name, requiresUsername: requiresUsername, usernameValidator: connection.usernameValidation)
+                        connections.database(name: connection.name, requiresUsername: requiresUsername, usernameValidator: connection.usernameValidation, passwordValidator: PasswordPolicyValidator(policy: connection.passwordPolicy))
                     }
                 }
                 info.oauth2.forEach { strategy in
@@ -166,6 +166,23 @@ private struct ConnectionInfo {
             return UsernameValidator(withLength: min...max, characterSet: UsernameValidator.auth0)
         default:
             return UsernameValidator()
+        }
+    }
+
+    var passwordPolicy: PasswordPolicy {
+        let name = (json["passwordPolicy"] as? String) ?? "none"
+        guard let policy = PasswordPolicy.Auth0(rawValue: name) else { return .none }
+        switch policy {
+        case .excellent:
+            return .excellent
+        case .good:
+            return .good
+        case .fair:
+            return .fair
+        case .low:
+            return .low
+        case .none:
+            return .none
         }
     }
 }

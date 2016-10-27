@@ -135,6 +135,26 @@ class CDNLoaderInteractorSpec: QuickSpec {
                 expect(connections?.database?.requiresUsername).toEventually(beFalsy())
             }
 
+            it("should load single database connection with no pwd policy") {
+                stub(isCDN(forClientId: clientId)) { _ in return Auth0Stubs.strategiesFromCDN([mockStrategy("auth0", connections: [mockDatabaseConnection(databaseConnection)])]) }
+                loader.load(callback)
+                expect(connections?.database?.passwordValidator.policy.name).toEventually(equal("none"))
+            }
+
+            it("should load single database connection with unknown pwd policy") {
+                stub(isCDN(forClientId: clientId)) { _ in return Auth0Stubs.strategiesFromCDN([mockStrategy("auth0", connections: [mockDatabaseConnection(databaseConnection, passwordPolicy: "random")])]) }
+                loader.load(callback)
+                expect(connections?.database?.passwordValidator.policy.name).toEventually(equal("none"))
+            }
+
+            ["none", "low", "fair", "good", "excellent"].forEach { name in
+                it("should load single database connection with policy \(name))") {
+                    stub(isCDN(forClientId: clientId)) { _ in return Auth0Stubs.strategiesFromCDN([mockStrategy("auth0", connections: [mockDatabaseConnection(databaseConnection, passwordPolicy: name)])]) }
+                    loader.load(callback)
+                    expect(connections?.database?.passwordValidator.policy.name).toEventually(equal(name))
+                }
+            }
+
             it("should load single database connection with custom username validation") {
                 stub(isCDN(forClientId: clientId)) { _ in return Auth0Stubs.strategiesFromCDN([mockStrategy("auth0", connections: [mockDatabaseConnection(databaseConnection, validation: ["username": ["min": 10, "max": 200]])])]) }
                 loader.load(callback)
@@ -227,11 +247,14 @@ private func mockOAuth2(name: String) -> JSONObject {
     return json
 }
 
-private func mockDatabaseConnection(name: String, requiresUsername: Bool? = nil, validation: JSONObject = [:]) -> JSONObject {
+private func mockDatabaseConnection(name: String, requiresUsername: Bool? = nil, validation: JSONObject = [:], passwordPolicy: String? = nil) -> JSONObject {
     var json: JSONObject = ["name": name ]
     if let requiresUsername = requiresUsername {
         json["requires_username"] = requiresUsername
     }
     json["validation"] = validation
+    if let passwordPolicy = passwordPolicy {
+        json["passwordPolicy"] = passwordPolicy
+    }
     return json
 }
