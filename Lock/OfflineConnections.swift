@@ -28,8 +28,8 @@ struct OfflineConnections: ConnectionBuildable {
     var database: DatabaseConnection? { return self.databases.first }
     private (set) var oauth2: [OAuth2Connection] = []
 
-    mutating func database(name name: String, requiresUsername: Bool, usernameValidator: UsernameValidator = UsernameValidator()) {
-        self.databases.append(DatabaseConnection(name: name, requiresUsername: requiresUsername, usernameValidator: usernameValidator))
+    mutating func database(name name: String, requiresUsername: Bool, usernameValidator: UsernameValidator = UsernameValidator(), passwordValidator: PasswordPolicyValidator) {
+        self.databases.append(DatabaseConnection(name: name, requiresUsername: requiresUsername, usernameValidator: usernameValidator, passwordValidator: passwordValidator))
     }
 
     mutating func social(name name: String, style: AuthStyle) {
