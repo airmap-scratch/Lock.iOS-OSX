@@ -38,6 +38,8 @@ class DatabasePresenter: Presentable, Loggable {
     var initialEmail: String? { return self.authenticator.validEmail ? self.authenticator.email : nil }
     var initialUsername: String? { return self.authenticator.validUsername ? self.authenticator.username : nil }
 
+    var currentMode: DatabaseModeSwitcher.Mode?
+
     convenience init(interactor: DatabaseInteractor, connection: DatabaseConnection, navigator: Navigable, options: Options) {
         self.init(authenticator: interactor, creator: interactor, connection: connection, navigator: navigator, options: options)
     }
@@ -65,6 +67,7 @@ class DatabasePresenter: Presentable, Loggable {
             case .Login:
                 self.showLogin(inView: view, identifier: self.authenticator.identifier)
             }
+            self.currentMode = switcher.selected
         }
 
         if allow.contains(.Login) && initialScreen == .Login {
@@ -179,7 +182,7 @@ class DatabasePresenter: Presentable, Loggable {
         case .EmailOrUsername:
             attribute = .EmailOrUsername
         case .Password:
-            attribute = .Password
+            attribute = .Password(enforcePolicy: self.currentMode == .Signup)
         case .Username:
             attribute = .Username
         case .Custom(let name, _, _, _, _, _):
